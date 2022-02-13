@@ -9,9 +9,12 @@
 #include <iostream>
 #include <fstream>
 #include "Shader.h"
+#include "Camera.h"
 
 using std::cout;
 using std::endl;
+
+typedef unsigned char byte;
 
 struct ModelTransform {
 	glm::vec3 position;
@@ -30,13 +33,38 @@ struct Color {
 };
 
 Color background{ 0.f, 0.f, 0.f, 0.f };
-float cam_dist = 3.0f;
+
+Camera camera(glm::vec3(0.f, 0.f, -2.f));
+
+bool wireframeMode = false; // Режим "каркаса" полигонов
+
+void updatePolygonMode() { // Режим рендера полигона
+	if (wireframeMode)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
 
 void onResize(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-void inputHandle(GLFWwindow* window) {
+void onScroll(GLFWwindow* window, double x, double y) {
+	camera.ChangeFOV(y);
+}
+
+void onKeyAction(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		switch (key) {
+		case GLFW_KEY_SPACE:
+			wireframeMode = !wireframeMode;
+			updatePolygonMode();
+			break;
+		}
+	}
+}
+
+void inputHandle(GLFWwindow* window, double dt) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window, true);
 	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
 		background = { 1.0f, 0.0f, 0.0f, 1.0f };
@@ -44,13 +72,32 @@ void inputHandle(GLFWwindow* window) {
 		background = { 0.0f, 1.0f, 0.0f, 1.0f };
 	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
 		background = { 0.0f, 0.0f, 1.0f, 1.0f };
+	uint32_t dir = 0;
 	if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
-		cam_dist += 0.05f;
+		dir |= CAM_UP;
 	if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
-		cam_dist -= 0.05f;
-}
+		dir |= CAM_DOWN;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		dir |= CAM_FORWARD;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		dir |= CAM_BACKWARD;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		dir |= CAM_LEFT;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		dir |= CAM_RIGHT;
 
-typedef unsigned char byte;
+	
+	double newx = 0.f, newy = 0.f;
+	glfwGetCursorPos(window, &newx, &newy); // Позиция курсора в оконных координатах
+	static double x = newx, y = newy;
+	double xoffset = newx - x;
+	double yoffset = newy - y;
+	x = newx;
+	y = newy;
+
+	camera.Move(dir, dt);
+	camera.Rotate(xoffset, -yoffset);
+}
 
 int main() {
 #pragma region WINDOW INITIALIZATION
@@ -59,7 +106,7 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Window", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(1280, 720, "Window", NULL, NULL);
 	if (window == NULL) {
 		cout << "Couldnt create window" << endl;
 		glfwTerminate();
@@ -74,9 +121,15 @@ int main() {
 	}
 
 	glfwSetFramebufferSizeCallback(window, onResize);
+	glfwSetScrollCallback(window, onScroll);
+	glfwSetKeyCallback(window, onKeyAction);
 
-	glViewport(0, 0, 800, 600);
+	glViewport(0, 0, 1280, 720);
 	glEnable(GL_DEPTH_TEST);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	updatePolygonMode();
+	glEnable(GL_CULL_FACE); // Включить срезание граней
+	glFrontFace(GL_CW); // Определение передних полигонов; cw - clockwise - по часовой; ccw (по умолчанию) - counter clockwise - против часовой
 #pragma endregion
 
 	int box_width, box_height, channels;
@@ -99,18 +152,18 @@ int main() {
 	};
 
 	unsigned int indices[] = {
-		0, 1, 2,
-		0, 2, 3,
-		0, 1, 4,
+		0, 1, 3,
+		1, 2, 3,
+		0, 4, 1,
 		1, 4, 5,
 		0, 3, 7,
-		0, 4, 7,
-		1, 2, 6,
+		0, 7, 4,
+		1, 6, 2,
 		1, 5, 6,
-		2, 3, 7,
+		2, 7, 3,
 		2, 6, 7,
-		4, 5, 7,
-		5, 6, 7
+		4, 7, 5,
+		5, 7, 6
 	};
 
 	ModelTransform polygonTrans1 = { glm::vec3(0.f, 0.f, 0.f), // position 
@@ -178,9 +231,13 @@ int main() {
 
 	Shader* polygon_shader = new Shader("shaders\\basic.vert", "shaders\\basic.frag");
 
+	double oldTime = glfwGetTime(), newTime, deltaTime;
+	
 	while (!glfwWindowShouldClose(window)) {
-
-		inputHandle(window);
+		newTime = glfwGetTime();
+		deltaTime = newTime - oldTime;
+		oldTime = newTime;
+		inputHandle(window, deltaTime);
 
 		polygonTrans1.rotation.z = glfwGetTime() * 60.0;
 		polygonTrans1.rotation.x = glfwGetTime() * 45.0;
@@ -202,14 +259,20 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		polygon_shader->use();
-
-		glm::vec3 pos_vec = glm::vec3(cam_dist * cos(glfwGetTime()* 0.3), 0.0f, cam_dist * sin(glfwGetTime() * 0.3)); // Вектор позиции камеры
-		glm::vec3 target_vec = glm::vec3(0.0f, 0.0f, 0.0f); // Вектор куда смотрит камера
-		glm::vec3 up_vec = glm::vec3(0.0f, 1.0f, 0.0f); // Вектор направления взгляда
-
-		glm::mat4 camera = glm::lookAt(pos_vec, target_vec, up_vec);
+		
+		//glm::vec3 pos_vec = glm::vec3(cam_dist * cos(glfwGetTime()* 0.3), 0.0f, cam_dist * sin(glfwGetTime() * 0.3)); // Вектор позиции камеры
+		//glm::vec3 target_vec = glm::vec3(0.0f, 0.0f, 0.0f); // Вектор куда смотрит камера
+		//glm::vec3 up_vec = glm::vec3(0.0f, 1.0f, 0.0f); // Вектор направления взгляда
+		//glm::mat4 camera = glm::lookAt(pos_vec, target_vec, up_vec);
 		//glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.f, 1.f, 0.01f, 100.f);
-		glm::mat4 projection = glm::perspective(45.f, 1.f, 0.01f, 100.f);
+		//glm::mat4 projection = glm::perspective(45.f, 1.f, 0.01f, 100.f);
+		
+		//camera.Rotate(0.5f, 0);
+
+		glm::mat4 p = camera.GetProjectionMatrix();
+		glm::mat4 v = camera.GetViewMatrix();
+		glm::mat4 pv = p * v;
+		glm::mat4 pvm;
 
 		// 1
 		glm::mat4 model = glm::mat4(1.0f);
@@ -219,8 +282,9 @@ int main() {
 		model = glm::rotate(model, glm::radians(polygonTrans1.rotation.z), glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, polygonTrans1.scale);
 
-		glm::mat4 pvm = projection * camera * model;
+		pvm = pv * model;
 		polygon_shader->setMatrix4F("pvm", pvm);
+		polygon_shader->setBool("wireframeMode", wireframeMode);
 
 		glBindTexture(GL_TEXTURE_2D, box_texture);
 		glBindVertexArray(VAO_polygon);
@@ -234,8 +298,9 @@ int main() {
 		model = glm::rotate(model, glm::radians(polygonTrans2.rotation.z), glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, polygonTrans2.scale);
 
-		/*pvm = projection * camera * model;
-		polygon_shader->setMatrix4F("pvm", pvm);*/
+		pvm = pv * model;
+		polygon_shader->setMatrix4F("pvm", pvm);
+		polygon_shader->setBool("wireframeMode", wireframeMode);
 
 		glBindVertexArray(VAO_polygon);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
@@ -248,8 +313,9 @@ int main() {
 		model = glm::rotate(model, glm::radians(polygonTrans3.rotation.z), glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, polygonTrans3.scale);
 
-		/*pvm = projection * camera * model;
-		polygon_shader->setMatrix4F("pvm", pvm);*/
+		pvm = pv * model;
+		polygon_shader->setMatrix4F("pvm", pvm);
+		polygon_shader->setBool("wireframeMode", wireframeMode);
 
 		glBindVertexArray(VAO_polygon);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
