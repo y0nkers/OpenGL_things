@@ -30,7 +30,7 @@ struct Color {
 };
 
 Color background{ 0.f, 0.f, 0.f, 0.f };
-float cam_dist = 1.0f;
+float cam_dist = 3.0f;
 
 void onResize(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
@@ -184,8 +184,8 @@ int main() {
 
 		polygonTrans1.rotation.z = glfwGetTime() * 60.0;
 		polygonTrans1.rotation.x = glfwGetTime() * 45.0;
-		//polygonTrans1.position.x = 0.6f * cos(glfwGetTime());
-		//polygonTrans1.position.y = 0.6f * sin(glfwGetTime());
+		polygonTrans1.position.x = 0.3f * cos(glfwGetTime());
+		polygonTrans1.position.y = 0.3f * sin(glfwGetTime());
 		polygonTrans1.setScale(0.2f);
 
 		polygonTrans2.rotation.z = glfwGetTime() * 30.0;
