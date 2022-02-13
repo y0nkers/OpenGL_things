@@ -34,7 +34,7 @@ struct Color {
 
 Color background{ 0.f, 0.f, 0.f, 0.f };
 
-Camera camera(glm::vec3(0.f, 0.f, -2.5f));
+Camera camera(glm::vec3(0.f, 0.f, -2.f));
 
 bool wireframeMode = false; // Режим "каркаса" полигонов
 
