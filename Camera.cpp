@@ -57,13 +57,13 @@ void Camera::Move(int32_t dirs, float deltaTime)
 
 void Camera::Rotate(float xoffset, float yoffset, GLboolean constrainPitch)
 {
-    xoffset *= Sensitivity; // Ñìåùåíèå ïî OX
-    yoffset *= Sensitivity; // Ñìåùåíèå ïî OY
+    xoffset *= Sensitivity; // â€”Ð¼ÐµÑ‰ÐµÐ½Ð¸Ðµ Ð¿Ð¾ OX
+    yoffset *= Sensitivity; // â€”Ð¼ÐµÑ‰ÐµÐ½Ð¸Ðµ Ð¿Ð¾ OY
 
     Yaw += xoffset;
     Pitch += yoffset;
 
-    if (constrainPitch) // Îãðàíè÷åíèå äëÿ íàêëîíà âïåð¸ä/íàçàä
+    if (constrainPitch) // ÑœÐ³Ñ€Ð°Ð½Ð¸Ñ‡ÐµÐ½Ð¸Ðµ Ð´Ð»Â¤ Ð½Ð°ÐºÐ»Ð¾Ð½Ð° Ð²Ð¿ÐµÑ€Ð„Ð´/Ð½Ð°Ð·Ð°Ð´
     {
         if (Pitch > 89.0f)
             Pitch = 89.0f;

@@ -36,9 +36,9 @@ Color background{ 0.f, 0.f, 0.f, 0.f };
 
 Camera camera(glm::vec3(0.f, 0.f, -2.f));
 
-bool wireframeMode = false; // Режим "каркаса" полигонов
+bool wireframeMode = false; // Р РµР¶РёРј "РєР°СЂРєР°СЃР°" РїРѕР»РёРіРѕРЅРѕРІ
 
-void updatePolygonMode() { // Режим рендера полигона
+void updatePolygonMode() { // Р РµР¶РёРј СЂРµРЅРґРµСЂР° РїРѕР»РёРіРѕРЅР°
 	if (wireframeMode)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	else
@@ -88,7 +88,7 @@ void inputHandle(GLFWwindow* window, double dt) {
 
 	
 	double newx = 0.f, newy = 0.f;
-	glfwGetCursorPos(window, &newx, &newy); // Позиция курсора в оконных координатах
+	glfwGetCursorPos(window, &newx, &newy); // РџРѕР·РёС†РёСЏ РєСѓСЂСЃРѕСЂР° РІ РѕРєРѕРЅРЅС‹С… РєРѕРѕСЂРґРёРЅР°С‚Р°С…
 	static double x = newx, y = newy;
 	double xoffset = newx - x;
 	double yoffset = newy - y;
@@ -128,8 +128,8 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	updatePolygonMode();
-	glEnable(GL_CULL_FACE); // Включить срезание граней
-	glFrontFace(GL_CCW); // Определение передних полигонов; cw - clockwise - по часовой; ccw (по умолчанию) - counter clockwise - против часовой
+	glEnable(GL_CULL_FACE); // Р’РєР»СЋС‡РёС‚СЊ СЃСЂРµР·Р°РЅРёРµ РіСЂР°РЅРµР№
+	glFrontFace(GL_CCW); // РћРїСЂРµРґРµР»РµРЅРёРµ РїРµСЂРµРґРЅРёС… РїРѕР»РёРіРѕРЅРѕРІ; cw - clockwise - РїРѕ С‡Р°СЃРѕРІРѕР№; ccw (РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ) - counter clockwise - РїСЂРѕС‚РёРІ С‡Р°СЃРѕРІРѕР№
 #pragma endregion
 
 	int box_width, box_height, channels;
@@ -140,7 +140,7 @@ int main() {
 
 	float cube[] = {
 	//position			normal					texture				color
-	// y-координаты текстур перевёрнуты?
+	// y-РєРѕРѕСЂРґРёРЅР°С‚С‹ С‚РµРєСЃС‚СѓСЂ РїРµСЂРµРІС‘СЂРЅСѓС‚С‹?
 	// LEFT SIDE
 	-1.0f,-1.0f,-1.0f,	-1.0f,  0.0f,  0.0f,	0.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,
 	-1.0f,-1.0f, 1.0f,	-1.0f,  0.0f,  0.0f,	1.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,
@@ -221,24 +221,24 @@ int main() {
 
 	// Vertex Buffer Object, Vertex Array Object
 	unsigned int VBO_polygon, VAO_polygon;
-	glGenBuffers(1, &VBO_polygon); // Генерируем буфер, в котором будут вершины
-	glGenVertexArrays(1, &VAO_polygon); // Генерируем вертексный массив
+	glGenBuffers(1, &VBO_polygon); // Р“РµРЅРµСЂРёСЂСѓРµРј Р±СѓС„РµСЂ, РІ РєРѕС‚РѕСЂРѕРј Р±СѓРґСѓС‚ РІРµСЂС€РёРЅС‹
+	glGenVertexArrays(1, &VAO_polygon); // Р“РµРЅРµСЂРёСЂСѓРµРј РІРµСЂС‚РµРєСЃРЅС‹Р№ РјР°СЃСЃРёРІ
 
 	glBindVertexArray(VAO_polygon);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_polygon); // Привязываем буфер к таргету
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_polygon); // РџСЂРёРІСЏР·С‹РІР°РµРј Р±СѓС„РµСЂ Рє С‚Р°СЂРіРµС‚Сѓ
 
-	// GL_STREAM_DRAW - данные записываются один раз, редко используются ГП
-	// GL_STATIC_DRAW - данные записываются один раз, используются часто
-	// GL_DYNAMIC_DRAW - данные могут перезаписываться
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW); // Загружает в видеопамять данные из ОЗУ
+	// GL_STREAM_DRAW - РґР°РЅРЅС‹Рµ Р·Р°РїРёСЃС‹РІР°СЋС‚СЃСЏ РѕРґРёРЅ СЂР°Р·, СЂРµРґРєРѕ РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ Р“Рџ
+	// GL_STATIC_DRAW - РґР°РЅРЅС‹Рµ Р·Р°РїРёСЃС‹РІР°СЋС‚СЃСЏ РѕРґРёРЅ СЂР°Р·, РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ С‡Р°СЃС‚Рѕ
+	// GL_DYNAMIC_DRAW - РґР°РЅРЅС‹Рµ РјРѕРіСѓС‚ РїРµСЂРµР·Р°РїРёСЃС‹РІР°С‚СЊСЃСЏ
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW); // Р—Р°РіСЂСѓР¶Р°РµС‚ РІ РІРёРґРµРѕРїР°РјСЏС‚СЊ РґР°РЅРЅС‹Рµ РёР· РћР—РЈ
 
-	// Как читать данные из массива
-	// 1 параметр - номер атрибута из шейдера (location = ?)
-	// 2 - количество данных на 1 вершину (не менее 1 и не более 4)
-	// 3 - тип данных
-	// 4 - должны ли быть данные нормализованными 
-	// 5 - шаг (через сколько байт начинается следующая область для второй вершины)
-	// 6 - указатель для адреса смещения
+	// РљР°Рє С‡РёС‚Р°С‚СЊ РґР°РЅРЅС‹Рµ РёР· РјР°СЃСЃРёРІР°
+	// 1 РїР°СЂР°РјРµС‚СЂ - РЅРѕРјРµСЂ Р°С‚СЂРёР±СѓС‚Р° РёР· С€РµР№РґРµСЂР° (location = ?)
+	// 2 - РєРѕР»РёС‡РµСЃС‚РІРѕ РґР°РЅРЅС‹С… РЅР° 1 РІРµСЂС€РёРЅСѓ (РЅРµ РјРµРЅРµРµ 1 Рё РЅРµ Р±РѕР»РµРµ 4)
+	// 3 - С‚РёРї РґР°РЅРЅС‹С…
+	// 4 - РґРѕР»Р¶РЅС‹ Р»Рё Р±С‹С‚СЊ РґР°РЅРЅС‹Рµ РЅРѕСЂРјР°Р»РёР·РѕРІР°РЅРЅС‹РјРё 
+	// 5 - С€Р°Рі (С‡РµСЂРµР· СЃРєРѕР»СЊРєРѕ Р±Р°Р№С‚ РЅР°С‡РёРЅР°РµС‚СЃСЏ СЃР»РµРґСѓСЋС‰Р°СЏ РѕР±Р»Р°СЃС‚СЊ РґР»СЏ РІС‚РѕСЂРѕР№ РІРµСЂС€РёРЅС‹)
+	// 6 - СѓРєР°Р·Р°С‚РµР»СЊ РґР»СЏ Р°РґСЂРµСЃР° СЃРјРµС‰РµРЅРёСЏ
 	
 	// position
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)0);
@@ -376,8 +376,8 @@ int main() {
 		glBindVertexArray(VAO_polygon);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		glfwSwapBuffers(window); // Смена буферов
-		glfwPollEvents(); // Обработка сообщений от ОС (нажатие кнопок, изменить окно)
+		glfwSwapBuffers(window); // РЎРјРµРЅР° Р±СѓС„РµСЂРѕРІ
+		glfwPollEvents(); // РћР±СЂР°Р±РѕС‚РєР° СЃРѕРѕР±С‰РµРЅРёР№ РѕС‚ РћРЎ (РЅР°Р¶Р°С‚РёРµ РєРЅРѕРїРѕРє, РёР·РјРµРЅРёС‚СЊ РѕРєРЅРѕ)
 	}
 
 	delete polygon_shader;

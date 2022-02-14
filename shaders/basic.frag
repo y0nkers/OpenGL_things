@@ -17,17 +17,17 @@ void main() {
     vec3 ambient = ambientColor * 0.2f;
 
     vec3 norm = normalize(vertNormal);
-    vec3 lightDir = normalize(fragPos - lightPos); // Направление света
+    vec3 lightDir = normalize(fragPos - lightPos); // РќР°РїСЂР°РІР»РµРЅРёРµ СЃРІРµС‚Р°
 
     float diff_coef = max(dot(norm, -lightDir), 0.0f);
-    vec3 diffuse = diff_coef * lightColor; // Вектор диффузной (матовой) освещённости
+    vec3 diffuse = diff_coef * lightColor; // Р’РµРєС‚РѕСЂ РґРёС„С„СѓР·РЅРѕР№ (РјР°С‚РѕРІРѕР№) РѕСЃРІРµС‰С‘РЅРЅРѕСЃС‚Рё
 
-    vec3 reflectDir = reflect(-lightDir, norm); // Отражённый относительно нормали свет
-    vec3 viewDir = normalize(fragPos - viewPos); // Направление взгляда камеры
+    vec3 reflectDir = reflect(-lightDir, norm); // РћС‚СЂР°Р¶С‘РЅРЅС‹Р№ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РЅРѕСЂРјР°Р»Рё СЃРІРµС‚
+    vec3 viewDir = normalize(fragPos - viewPos); // РќР°РїСЂР°РІР»РµРЅРёРµ РІР·РіР»СЏРґР° РєР°РјРµСЂС‹
     
     float specular_multiplier = 2.0f;
     float specular_coef = pow(max(dot(viewDir, reflectDir), 0.0f), 512);
-    vec3 specular = specular_multiplier * specular_coef * lightColor; // Вектор спекулярной (зеркальной) освещённости
+    vec3 specular = specular_multiplier * specular_coef * lightColor; // Р’РµРєС‚РѕСЂ СЃРїРµРєСѓР»СЏСЂРЅРѕР№ (Р·РµСЂРєР°Р»СЊРЅРѕР№) РѕСЃРІРµС‰С‘РЅРЅРѕСЃС‚Рё
 
     if (wireframeMode)
         outColor = vertColor;

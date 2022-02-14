@@ -39,7 +39,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
 
 	unsigned int vertex;
 	vertex = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertex, 1, &vShaderCode, NULL); // Подключаем к шейдеру исходный код
+	glShaderSource(vertex, 1, &vShaderCode, NULL); // РџРѕРґРєР»СЋС‡Р°РµРј Рє С€РµР№РґРµСЂСѓ РёСЃС…РѕРґРЅС‹Р№ РєРѕРґ
 	glCompileShader(vertex);
 	checkCompileErrors(vertex, "VERTEX");
 
@@ -50,7 +50,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
 	checkCompileErrors(fragment, "FRAGMENT");
 
 	programID = glCreateProgram();
-	glAttachShader(programID, vertex); // Компилируем шейдеры
+	glAttachShader(programID, vertex); // РљРѕРјРїРёР»РёСЂСѓРµРј С€РµР№РґРµСЂС‹
 	glAttachShader(programID, fragment);
 	glLinkProgram(programID);
 	checkCompileErrors(programID, "PROGRAM");

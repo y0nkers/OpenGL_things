@@ -1,5 +1,5 @@
 #version 330 core
-layout (location = 0) in vec3 inPos; // in - входные данные
+layout (location = 0) in vec3 inPos; // in - РІС…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ
 layout (location = 1) in vec3 inNormal;
 layout (location = 2) in vec2 inTexCords;
 layout (location = 3) in vec4 inColor;

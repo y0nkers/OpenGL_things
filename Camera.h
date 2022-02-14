@@ -16,11 +16,11 @@ enum Camera_Movement {
     CAM_DOWN = 32
 };
 
-const float YAW = 90.0f; // поворот влево/вправо в горизонтальной плоскости
-const float PITCH = 0.0f; // угол наклона вперёд/назад
+const float YAW = 90.0f; // РїРѕРІРѕСЂРѕС‚ РІР»РµРІРѕ/РІРїСЂР°РІРѕ РІ РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅРѕР№ РїР»РѕСЃРєРѕСЃС‚Рё
+const float PITCH = 0.0f; // СѓРіРѕР» РЅР°РєР»РѕРЅР° РІРїРµСЂС‘Рґ/РЅР°Р·Р°Рґ
 
 const float SPEED = 2.5f; 
-const float SENSITIVITY = 0.05f; // Чувствительность к повороту
+const float SENSITIVITY = 0.05f; // Р§СѓРІСЃС‚РІРёС‚РµР»СЊРЅРѕСЃС‚СЊ Рє РїРѕРІРѕСЂРѕС‚Сѓ
 
 const float FOV = 45.0f; 
 const float ZNEAR = 0.1f;
@@ -31,11 +31,11 @@ const float ASPECTRATIO = 16.f / 9.f;
 class Camera
 {
 public:
-    glm::vec3 Position; // Вектор позиции камеры
-    glm::vec3 Front; // Вектор куда смотрит камера
-    glm::vec3 Up; // Где находится верх у камеры
+    glm::vec3 Position; // Р’РµРєС‚РѕСЂ РїРѕР·РёС†РёРё РєР°РјРµСЂС‹
+    glm::vec3 Front; // Р’РµРєС‚РѕСЂ РєСѓРґР° СЃРјРѕС‚СЂРёС‚ РєР°РјРµСЂР°
+    glm::vec3 Up; // Р“РґРµ РЅР°С…РѕРґРёС‚СЃСЏ РІРµСЂС… Сѓ РєР°РјРµСЂС‹
     glm::vec3 Right;
-    glm::vec3 WorldUp; // Вверх мировой
+    glm::vec3 WorldUp; // Р’РІРµСЂС… РјРёСЂРѕРІРѕР№
 
     float Yaw;
     float Pitch;
@@ -56,9 +56,9 @@ public:
         float upX, float upY, float upZ,
         float yaw, float pitch);
 
-    glm::mat4 GetViewMatrix(); // Матрица взгляда
+    glm::mat4 GetViewMatrix(); // РњР°С‚СЂРёС†Р° РІР·РіР»СЏРґР°
 
-    glm::mat4 GetProjectionMatrix(); // Матрица перспективы
+    glm::mat4 GetProjectionMatrix(); // РњР°С‚СЂРёС†Р° РїРµСЂСЃРїРµРєС‚РёРІС‹
 
     void Move(int32_t direction, float deltaTime);
 
