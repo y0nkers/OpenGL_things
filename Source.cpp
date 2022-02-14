@@ -129,41 +129,60 @@ int main() {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	updatePolygonMode();
 	glEnable(GL_CULL_FACE); // Включить срезание граней
-	glFrontFace(GL_CW); // Определение передних полигонов; cw - clockwise - по часовой; ccw (по умолчанию) - counter clockwise - против часовой
+	glFrontFace(GL_CCW); // Определение передних полигонов; cw - clockwise - по часовой; ccw (по умолчанию) - counter clockwise - против часовой
 #pragma endregion
 
 	int box_width, box_height, channels;
 	byte* data = stbi_load("images\\arbuzman.png", &box_width, &box_height, &channels, 0);
 
 
-	const int verts = 8;
+	const int verts = 36;
 
-	// Вершины треугольника
-	// некорректное применение текстур
-	float cube[verts * (3 + 4 + 2)] = {
-/*0*/		-1.0f, 1.0f, -1.0f,		1.0f, 0.0f, 0.0f, 1.0f,		1.0f, 0.0f,
-/*1*/		1.0f, 1.0f, -1.0f,		0.5f, 0.5f, 0.0f, 1.0f,		0.0f, 0.0f,
-/*2*/		1.0f, 1.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,		1.0f, 0.0f,
-/*3*/		-1.0f, 1.0f, 1.0f,		0.0f, 0.5f, 0.5f, 1.0f,		0.0f, 0.0f,
-/*4*/		-1.0f, -1.0f, -1.0f,	0.0f, 0.0f, 1.0f, 1.0f,		1.0f, 1.0f,
-/*5*/		1.0f, -1.0f, -1.0f,		0.5f, 0.0f, 0.5f, 1.0f,		0.0f, 1.0f,
-/*6*/		1.0f, -1.0f, 1.0f,		0.5f, 0.5f, 0.5f, 1.0f,		1.0f, 1.0f,
-/*7*/		-1.0f, -1.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,		0.0f, 1.0f
-	};
-
-	unsigned int indices[] = {
-		0, 1, 3,
-		1, 2, 3,
-		0, 4, 1,
-		1, 4, 5,
-		0, 3, 7,
-		0, 7, 4,
-		1, 6, 2,
-		1, 5, 6,
-		2, 7, 3,
-		2, 6, 7,
-		4, 7, 5,
-		5, 7, 6
+	float cube[] = {
+	//position			normal					texture				color
+	// y-координаты текстур перевёрнуты?
+	// LEFT SIDE
+	-1.0f,-1.0f,-1.0f,	-1.0f,  0.0f,  0.0f,	0.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,	-1.0f,  0.0f,  0.0f,	1.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,	-1.0f,  0.0f,  0.0f,	1.0f, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,	-1.0f,  0.0f,  0.0f,	0.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,	-1.0f,  0.0f,  0.0f,	1.0f, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+	-1.0f, 1.0f,-1.0f,	-1.0f,  0.0f,  0.0f,	0.0f, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+	// BACK SIDE																			
+	1.0f, 1.0f,-1.0f,	0.0f,  0.0f, -1.0f, 	0.0f, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,	0.0f,  0.0f, -1.0f, 	1.0f, 1.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+	-1.0f, 1.0f,-1.0f,	0.0f,  0.0f, -1.0f, 	1.0f, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 1.0f,-1.0f,	0.0f,  0.0f, -1.0f,		0.0f, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f,-1.0f,-1.0f,	0.0f,  0.0f, -1.0f,		0.0f, 1.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,	0.0f,  0.0f, -1.0f,		1.0f, 1.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+	// DOWN SIDE																			
+	1.0f,-1.0f, 1.0f,	0.0f, -1.0f,  0.0f,		0.0f, 1.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,	0.0f, -1.0f,  0.0f,		1.0f, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+	1.0f,-1.0f,-1.0f,	0.0f, -1.0f,  0.0f,		0.0f, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,	0.0f, -1.0f,  0.0f,		0.0f, 1.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,	0.0f, -1.0f,  0.0f,		1.0f, 1.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,	0.0f, -1.0f,  0.0f,		1.0f, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+	// FRONT SIDE																			
+	-1.0f, 1.0f, 1.0f,	0.0f,  0.0f, 1.0f,		0.0f, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,	0.0f,  0.0f, 1.0f,		0.0f, 1.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,	0.0f,  0.0f, 1.0f,		1.0f, 1.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,	0.0f,  0.0f, 1.0f,		1.0f, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,	0.0f,  0.0f, 1.0f,		0.0f, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,	0.0f,  0.0f, 1.0f,		1.0f, 1.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+	// RIGHT SIDE																			
+	1.0f, 1.0f, 1.0f,	1.0f,  0.0f,  0.0f,		0.0f, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f,-1.0f,-1.0f,	1.0f,  0.0f,  0.0f,		1.0f, 1.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 1.0f,-1.0f,	1.0f,  0.0f,  0.0f,		1.0f, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f,-1.0f,-1.0f,	1.0f,  0.0f,  0.0f,		1.0f, 1.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,	1.0f,  0.0f,  0.0f,		0.0f, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,	1.0f,  0.0f,  0.0f,		0.0f, 1.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+	// UP SIDE	(dont reverse texture y-coords)												
+	1.0f, 1.0f, 1.0f,	0.0f,  1.0f,  0.0f,		1.0f, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+	1.0f, 1.0f,-1.0f,	0.0f,  1.0f,  0.0f,		1.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+	-1.0f, 1.0f,-1.0f,	0.0f,  1.0f,  0.0f,		0.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,	0.0f,  1.0f,  0.0f,		1.0f, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+	-1.0f, 1.0f,-1.0f,	0.0f,  1.0f,  0.0f,		0.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,	0.0f,  1.0f,  0.0f,		0.0f, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f
 	};
 
 	ModelTransform polygonTrans1 = { glm::vec3(0.f, 0.f, 0.f), // position 
@@ -177,6 +196,10 @@ int main() {
 	ModelTransform polygonTrans3 = { glm::vec3(0.f, 0.f, 0.f), // position 
 									glm::vec3(0.f, 0.f, 0.f), // rotation
 									glm::vec3(1.f, 1.f, 1.f) }; // scale
+
+	ModelTransform lightTrans = { glm::vec3(0.f, 0.f, 0.f), // position 
+									glm::vec3(0.f, 0.f, 0.f), // rotation
+									glm::vec3(0.1f, 0.1f, 0.1f) }; // scale
 
 #pragma region BUFFERS INITIALIZATION
 	unsigned int box_texture;
@@ -196,10 +219,9 @@ int main() {
 	//glGenerateMipmap(GL_TEXTURE_2D);
 	stbi_image_free(data);
 
-	// Vertex Buffer Object, Vertex Array Object, Element Buffer Object
-	unsigned int VBO_polygon, VAO_polygon, EBO_polygon; // Объект буфера вершин
+	// Vertex Buffer Object, Vertex Array Object
+	unsigned int VBO_polygon, VAO_polygon;
 	glGenBuffers(1, &VBO_polygon); // Генерируем буфер, в котором будут вершины
-	glGenBuffers(1, &EBO_polygon);
 	glGenVertexArrays(1, &VAO_polygon); // Генерируем вертексный массив
 
 	glBindVertexArray(VAO_polygon);
@@ -208,10 +230,7 @@ int main() {
 	// GL_STREAM_DRAW - данные записываются один раз, редко используются ГП
 	// GL_STATIC_DRAW - данные записываются один раз, используются часто
 	// GL_DYNAMIC_DRAW - данные могут перезаписываться
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * verts * 9, cube, GL_STATIC_DRAW); // Загружает в видеопамять данные из ОЗУ
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_polygon);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 36, indices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW); // Загружает в видеопамять данные из ОЗУ
 
 	// Как читать данные из массива
 	// 1 параметр - номер атрибута из шейдера (location = ?)
@@ -220,19 +239,33 @@ int main() {
 	// 4 - должны ли быть данные нормализованными 
 	// 5 - шаг (через сколько байт начинается следующая область для второй вершины)
 	// 6 - указатель для адреса смещения
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0); // Включаем аттрибут
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1); // Включаем аттрибут
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(7 * sizeof(float)));
-	glEnableVertexAttribArray(2); // Включаем аттрибут
+	
+	// position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// normal
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	// texture coords
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	// color
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(8 * sizeof(float)));
+	glEnableVertexAttribArray(3);
 
 #pragma endregion
 
 	Shader* polygon_shader = new Shader("shaders\\basic.vert", "shaders\\basic.frag");
+	Shader* light_shader = new Shader("shaders\\light.vert", "shaders\\light.frag");
 
 	double oldTime = glfwGetTime(), newTime, deltaTime;
 	
+	glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 ambientColor = glm::vec3(1.0f, 1.0f, 1.0f);
+
 	while (!glfwWindowShouldClose(window)) {
 		newTime = glfwGetTime();
 		deltaTime = newTime - oldTime;
@@ -240,9 +273,9 @@ int main() {
 		inputHandle(window, deltaTime);
 
 		polygonTrans1.rotation.z = glfwGetTime() * 60.0;
-		polygonTrans1.rotation.x = glfwGetTime() * 45.0;
-		polygonTrans1.position.x = 0.3f * cos(glfwGetTime());
-		polygonTrans1.position.y = 0.3f * sin(glfwGetTime());
+		//polygonTrans1.rotation.x = glfwGetTime() * 45.0;
+		polygonTrans1.position.x = 0.6f * cos(glfwGetTime());
+		polygonTrans1.position.y = 0.6f * sin(glfwGetTime());
 		polygonTrans1.setScale(0.2f);
 
 		polygonTrans2.rotation.z = glfwGetTime() * 30.0;
@@ -255,24 +288,19 @@ int main() {
 		//polygonTrans3.rotation.x = glfwGetTime() * 90.0;
 		//polygonTrans3.rotation.y = glfwGetTime() * 60.0;
 
+		lightPos.x = 2.5f * cos(glfwGetTime() * 1.2f);
+		lightPos.y = 0.0f;
+		lightPos.z = 2.5f * sin(glfwGetTime() * 1.2f);
+		lightTrans.position = lightPos;
+
 		glClearColor(background.r, background.g, background.b, background.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		polygon_shader->use();
-		
-		//glm::vec3 pos_vec = glm::vec3(cam_dist * cos(glfwGetTime()* 0.3), 0.0f, cam_dist * sin(glfwGetTime() * 0.3)); // Вектор позиции камеры
-		//glm::vec3 target_vec = glm::vec3(0.0f, 0.0f, 0.0f); // Вектор куда смотрит камера
-		//glm::vec3 up_vec = glm::vec3(0.0f, 1.0f, 0.0f); // Вектор направления взгляда
-		//glm::mat4 camera = glm::lookAt(pos_vec, target_vec, up_vec);
-		//glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.f, 1.f, 0.01f, 100.f);
-		//glm::mat4 projection = glm::perspective(45.f, 1.f, 0.01f, 100.f);
 		
 		//camera.Rotate(0.5f, 0);
 
 		glm::mat4 p = camera.GetProjectionMatrix();
 		glm::mat4 v = camera.GetViewMatrix();
 		glm::mat4 pv = p * v;
-		glm::mat4 pvm;
 
 		// 1
 		glm::mat4 model = glm::mat4(1.0f);
@@ -282,13 +310,18 @@ int main() {
 		model = glm::rotate(model, glm::radians(polygonTrans1.rotation.z), glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, polygonTrans1.scale);
 
-		pvm = pv * model;
-		polygon_shader->setMatrix4F("pvm", pvm);
+		polygon_shader->use();
+		polygon_shader->setMatrix4F("pv", pv);
+		polygon_shader->setMatrix4F("model", model);
 		polygon_shader->setBool("wireframeMode", wireframeMode);
+		polygon_shader->setVec3("viewPos", camera.Position);
+		polygon_shader->setVec3("lightPos", lightPos);
+		polygon_shader->setVec3("lightColor", lightColor);
+		polygon_shader->setVec3("ambientColor", ambientColor);
 
 		glBindTexture(GL_TEXTURE_2D, box_texture);
 		glBindVertexArray(VAO_polygon);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// 2
 		model = glm::mat4(1.0f);
@@ -298,12 +331,17 @@ int main() {
 		model = glm::rotate(model, glm::radians(polygonTrans2.rotation.z), glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, polygonTrans2.scale);
 
-		pvm = pv * model;
-		polygon_shader->setMatrix4F("pvm", pvm);
+		polygon_shader->use();
+		polygon_shader->setMatrix4F("pv", pv);
+		polygon_shader->setMatrix4F("model", model);
 		polygon_shader->setBool("wireframeMode", wireframeMode);
+		polygon_shader->setVec3("viewPos", camera.Position);
+		polygon_shader->setVec3("lightPos", lightPos);
+		polygon_shader->setVec3("lightColor", lightColor);
+		polygon_shader->setVec3("ambientColor", ambientColor);
 
 		glBindVertexArray(VAO_polygon);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// 3
 		model = glm::mat4(1.0f);
@@ -313,12 +351,30 @@ int main() {
 		model = glm::rotate(model, glm::radians(polygonTrans3.rotation.z), glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, polygonTrans3.scale);
 
-		pvm = pv * model;
-		polygon_shader->setMatrix4F("pvm", pvm);
+		polygon_shader->use();
+		polygon_shader->setMatrix4F("pv", pv);
+		polygon_shader->setMatrix4F("model", model);
 		polygon_shader->setBool("wireframeMode", wireframeMode);
+		polygon_shader->setVec3("viewPos", camera.Position);
+		polygon_shader->setVec3("lightPos", lightPos);
+		polygon_shader->setVec3("lightColor", lightColor);
+		polygon_shader->setVec3("ambientColor", ambientColor);
 
 		glBindVertexArray(VAO_polygon);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// light
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, lightTrans.position);
+		model = glm::scale(model, lightTrans.scale);
+
+		light_shader->use();
+		light_shader->setMatrix4F("pv", pv);
+		light_shader->setMatrix4F("model", model);
+		light_shader->setVec3("lightColor", lightColor);
+
+		glBindVertexArray(VAO_polygon);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glfwSwapBuffers(window); // Смена буферов
 		glfwPollEvents(); // Обработка сообщений от ОС (нажатие кнопок, изменить окно)
