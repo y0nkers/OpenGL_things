@@ -3,14 +3,21 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include <assimp/Importer.hpp>
 
+#include <filesystem>
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
+
 #include "Shader.h"
 #include "Camera.h"
+#include "Model.h"
+#include "Light.h"
 
 using std::cout;
 using std::endl;
@@ -40,25 +47,6 @@ struct Material {
 	glm::vec3 diffuse;
 	glm::vec3 specular;
 	float shininess;
-};
-
-enum class LightType { Directional = 1, Point = 2, Spot = 3};
-
-struct Light { 
-	LightType type;
-
-	glm::vec3 position;
-	glm::vec3 direction;
-	float cutOff; // Угол отсекания освещённости
-
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
-
-	// Коэффициенты затухания света
-	float constant;
-	float linear;
-	float quadratic;
 };
 
 Camera camera(glm::vec3(0.f, 0.f, -2.f));
@@ -103,6 +91,11 @@ void inputHandle(GLFWwindow* window, double dt) {
 		background = { 0.5f, 0.8f, 0.8f, 1.0f };
 	if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
 		background = { 0.0f, 0.0f, 0.0f, 1.0f };
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+	{
+		cout << camera.Position.x << " " << camera.Position.y << " " << camera.Position.z << endl;
+		cout << camera.Yaw << " " << camera.Pitch << endl;
+	}
 	uint32_t dir = 0;
 	if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
 		dir |= CAM_UP;
@@ -129,6 +122,8 @@ void inputHandle(GLFWwindow* window, double dt) {
 	camera.Move(dir, dt);
 	camera.Rotate(xoffset, -yoffset);
 }
+
+Light* flashLight, * redLamp, * blueLamp, * sunLight;
 
 int main() {
 #pragma region WINDOW INITIALIZATION
@@ -165,7 +160,6 @@ int main() {
 
 	int box_width, box_height, channels;
 	byte* data = stbi_load("images\\arbuzman.png", &box_width, &box_height, &channels, 0);
-
 
 	const int verts = 36;
 
@@ -254,10 +248,6 @@ int main() {
 			i--;
 	}
 
-	ModelTransform lightTrans = {	glm::vec3(0.f, 0.f, 0.f), // position 
-									glm::vec3(0.f, 0.f, 0.f), // rotation
-									glm::vec3(0.1f, 0.1f, 0.1f) }; // scale
-
 #pragma region BUFFERS INITIALIZATION
 	unsigned int box_texture;
 	glGenTextures(1, &box_texture);
@@ -316,37 +306,61 @@ int main() {
 
 	Shader* polygon_shader = new Shader("shaders\\basic.vert", "shaders\\basic.frag");
 	Shader* light_shader = new Shader("shaders\\light.vert", "shaders\\light.frag");
+	Shader* backpack_shader = new Shader("shaders\\backpack.vert", "shaders\\backpack.frag");
+
+	Model backpack("models/backpack/backpack.obj", false);
+
+	ModelTransform lightTrans = {
+		glm::vec3(0.f, 0.f, 0.f),			// position
+		glm::vec3(0.f, 0.f, 0.f),			// rotation
+		glm::vec3(0.01, 0.01f, 0.01f) };	// scale
 
 	double oldTime = glfwGetTime(), newTime, deltaTime;
 
-	Light lights[10];
-	int lightsCount = 3;
+#pragma region LIGHT INITIALIZATION
 
-	lights[0].type = LightType::Point;
-	lights[0].position = glm::vec3(0.0f, 0.0f, 0.0f);
-	lights[0].ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-	lights[0].diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-	lights[0].specular = glm::vec3(3.0f, 3.0f, 3.0f);
-	lights[0].constant = 1.0f;
-	lights[0].linear = 0.14f;
-	lights[0].quadratic = 0.07f;
-	
-	lights[1].type = LightType::Directional;
-	lights[1].direction = glm::vec3(-1.0f, -1.0f, -1.0f);
-	lights[1].ambient = glm::vec3(0.3f, 0.3f, 0.3f);
-	lights[1].diffuse = glm::vec3(0.6f, 0.85f, 1.0f);
-	lights[1].specular = glm::vec3(0.0f, 0.0f, 0.0f);
+	vector<Light*> lights;
+	int total_lights = 4;
+	int active_lights = 0;
 
-	lights[2].type = LightType::Spot;
-	lights[2].position = glm::vec3(0.0f, 0.0f, 0.0f);
-	lights[2].direction = glm::vec3(0.0f, 0.0f, 0.0f);
-	lights[2].cutOff = glm::radians(10.0f);
-	lights[2].ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-	lights[2].diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-	lights[2].specular = glm::vec3(3.0f, 3.0f, 3.0f);
-	lights[2].constant = 1.0f;
-	lights[2].linear = 0.14f;
-	lights[2].quadratic = 0.07f;
+	redLamp = new Light("LampRed", true);
+	redLamp->initLikePointLight(
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.1f, 0.1f, 0.1f),
+		glm::vec3(1.0f, 0.2f, 0.2f),
+		glm::vec3(1.0f, 0.2f, 0.2f),
+		1.0f, 0.1f, 0.09f);
+	lights.push_back(redLamp);
+
+	blueLamp = new Light("LampBlue", true);
+	blueLamp->initLikePointLight(
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.1f, 0.1f, 0.1f),
+		glm::vec3(0.2f, 0.2f, 1.0f),
+		glm::vec3(1.0f, 0.2f, 1.0f),
+		1.0f, 0.1f, 0.09f);
+	lights.push_back(blueLamp);
+
+	sunLight = new Light("Sun", true);
+	sunLight->initLikeDirectionalLight(
+		glm::vec3(-1.0f, -1.0f, -1.0f),
+		glm::vec3(0.1f, 0.1f, 0.1f),
+		glm::vec3(0.5f, 0.5f, 0.5f),
+		glm::vec3(0.0f, 0.0f, 0.0f));
+	lights.push_back(sunLight);
+
+	flashLight = new Light("FlashLight", true);
+	flashLight->initLikeSpotLight(
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::radians(10.f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.7f, 0.7f, 0.6f),
+		glm::vec3(0.8f, 0.8f, 0.6f),
+		1.0f, 0.1f, 0.09f);
+	lights.push_back(flashLight);
+
+#pragma endregion
 
 	while (!glfwWindowShouldClose(window)) {
 		newTime = glfwGetTime();
@@ -354,10 +368,16 @@ int main() {
 		oldTime = newTime;
 		inputHandle(window, deltaTime);
 
-		lightTrans.position = lights[0].position;
+		flashLight->position = camera.Position - camera.Up * 0.3f;
+		flashLight->direction = camera.Front;
 
-		lights[2].position = camera.Position - camera.Up * 0.3f;
-		lights[2].direction = camera.Front;
+		redLamp->position.x = -0.2f;
+		redLamp->position.z = 0.1f * cos(newTime * 2);
+		redLamp->position.y = 0.1f * sin(newTime * 2);
+
+		blueLamp->position.x = 0.2f;
+		blueLamp->position.z = 0.1f * cos(newTime * 2 + glm::pi<float>());
+		blueLamp->position.y = 0.1f * sin(newTime * 2 + glm::pi<float>());
 
 		glClearColor(background.r, background.g, background.b, background.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -367,50 +387,19 @@ int main() {
 		glm::mat4 pv = p * v;
 		glm::mat4 model;
 
-		polygon_shader->use();
+		// Drawing boxes
 
+		polygon_shader->use();
 		polygon_shader->setMatrix4F("pv", pv);
 		polygon_shader->setBool("wireframeMode", wireframeMode);
 		polygon_shader->setVec3("viewPos", camera.Position);
-		polygon_shader->setInt("lightsCount", lightsCount);
 
-		for (int i = 0; i < lightsCount; i++) {
-			std::string num = std::to_string(i);
-			switch (lights[i].type)
-			{
-			case LightType::Directional:
-				polygon_shader->setInt("light[" + num + "].type", int(lights[i].type));
-				polygon_shader->setVec3("light[" + num + "].direction", lights[i].direction);
-				polygon_shader->setVec3("light[" + num + "].ambient", lights[i].ambient);
-				polygon_shader->setVec3("light[" + num + "].diffuse", lights[i].diffuse);
-				polygon_shader->setVec3("light[" + num + "].specular", lights[i].specular);
-				break;
-
-			case LightType::Point:
-				polygon_shader->setInt("light[" + num + "].type", int(lights[i].type));
-				polygon_shader->setVec3("light[" + num + "].position", lights[i].position);
-				polygon_shader->setVec3("light[" + num + "].ambient", lights[i].ambient);
-				polygon_shader->setVec3("light[" + num + "].diffuse", lights[i].diffuse);
-				polygon_shader->setVec3("light[" + num + "].specular", lights[i].specular);
-				polygon_shader->setFloat("light[" + num + "].constant", lights[i].constant);
-				polygon_shader->setFloat("light[" + num + "].linear", lights[i].linear);
-				polygon_shader->setFloat("light[" + num + "].quadratic", lights[i].quadratic);
-				break;
-
-			case LightType::Spot:
-				polygon_shader->setInt("light[" + num + "].type", int(lights[i].type));
-				polygon_shader->setVec3("light[" + num + "].position", lights[i].position);
-				polygon_shader->setVec3("light[" + num + "].direction", lights[i].direction);
-				polygon_shader->setFloat("light[" + num + "].cutOff", lights[i].cutOff);
-				polygon_shader->setVec3("light[" + num + "].ambient", lights[i].ambient);
-				polygon_shader->setVec3("light[" + num + "].diffuse", lights[i].diffuse);
-				polygon_shader->setVec3("light[" + num + "].specular", lights[i].specular);
-				polygon_shader->setFloat("light[" + num + "].constant", lights[i].constant);
-				polygon_shader->setFloat("light[" + num + "].linear", lights[i].linear);
-				polygon_shader->setFloat("light[" + num + "].quadratic", lights[i].quadratic);
-				break;
-			}
+		int active_lights = 0;
+		for (int i = 0; i < total_lights; i++) {
+			active_lights += lights[i]->putInShader(polygon_shader, active_lights);
 		}
+
+		polygon_shader->setInt("lights_count", active_lights);
 
 		for (int i = 0; i < cube_count; i++) {
 			model = glm::mat4(1.0f);
@@ -432,18 +421,47 @@ int main() {
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 		
-		// light
+		// Drawing lamps
+		light_shader->use();
+		light_shader->setMatrix4F("pv", pv);
+		glBindVertexArray(VAO_polygon);
+
+		// Red Lamp
+		lightTrans.position = redLamp->position;
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, lightTrans.position);
 		model = glm::scale(model, lightTrans.scale);
-
-		light_shader->use();
-		light_shader->setMatrix4F("pv", pv);
 		light_shader->setMatrix4F("model", model);
-		light_shader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-
-		glBindVertexArray(VAO_polygon);
+		light_shader->setVec3("lightColor", glm::vec3(1.0f, 0.2f, 0.2f));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// Blue Lamp
+		lightTrans.position = blueLamp->position;
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, lightTrans.position);
+		model = glm::scale(model, lightTrans.scale);
+		light_shader->setMatrix4F("model", model);
+		light_shader->setVec3("lightColor", glm::vec3(0.2f, 0.2f, 1.0f));
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// Backpack
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+		backpack_shader->use();
+		backpack_shader->setMatrix4F("pv", pv);
+		backpack_shader->setMatrix4F("model", model);
+		backpack_shader->setFloat("shininess", 64.0f);
+		backpack_shader->setVec3("viewPos", camera.Position);
+
+		active_lights = 0;
+		for (int i = 0; i < lights.size(); i++)
+		{
+			active_lights += lights[i]->putInShader(backpack_shader, active_lights); // +1 либо +0
+		}
+		backpack_shader->setInt("lights_count", active_lights);
+
+		backpack.Draw(backpack_shader);
 
 		glfwSwapBuffers(window); // Смена буферов
 		glfwPollEvents(); // Обработка сообщений от ОС (нажатие кнопок, изменить окно)
@@ -451,6 +469,7 @@ int main() {
 
 	delete polygon_shader;
 	delete light_shader;
+	delete backpack_shader;
 
 	glfwTerminate();
 	return 0;
