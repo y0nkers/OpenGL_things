@@ -399,7 +399,7 @@ int main() {
 			active_lights += lights[i]->putInShader(polygon_shader, active_lights);
 		}
 
-		polygon_shader->setInt("lights_count", active_lights);
+		polygon_shader->setInt("lightsCount", active_lights);
 
 		for (int i = 0; i < cube_count; i++) {
 			model = glm::mat4(1.0f);
