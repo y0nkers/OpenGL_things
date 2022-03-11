@@ -165,7 +165,6 @@ int main() {
 
 	float cube[] = {
 	//position			normal					texture				color
-	// y-координаты текстур перевёрнуты?
 	// LEFT SIDE
 	-1.0f,-1.0f,-1.0f,	-1.0f,  0.0f,  0.0f,	0.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,
 	-1.0f,-1.0f, 1.0f,	-1.0f,  0.0f,  0.0f,	1.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,
@@ -310,6 +309,11 @@ int main() {
 
 	Model backpack("models/backpack/backpack.obj", false);
 
+	ModelTransform backpackTrans = {
+		glm::vec3(0.0f, 0.0f, 0.0f),	// position
+		glm::vec3(0.0f, 0.0f, 0.0f),	// rotation
+		glm::vec3(0.1f, 0.1f, 0.1f) };	// scale
+
 	ModelTransform lightTrans = {
 		glm::vec3(0.f, 0.f, 0.f),			// position
 		glm::vec3(0.f, 0.f, 0.f),			// rotation
@@ -368,7 +372,9 @@ int main() {
 		oldTime = newTime;
 		inputHandle(window, deltaTime);
 
-		flashLight->position = camera.Position - camera.Up * 0.3f;
+		backpackTrans.rotation.y = (float)glfwGetTime();
+
+		flashLight->position = camera.Position; // - camera.Up * 0.3f;
 		flashLight->direction = camera.Front;
 
 		redLamp->position.x = -0.2f;
@@ -399,7 +405,7 @@ int main() {
 			active_lights += lights[i]->putInShader(polygon_shader, active_lights);
 		}
 
-		polygon_shader->setInt("lights_count", active_lights);
+		polygon_shader->setInt("lightsCount", active_lights);
 
 		for (int i = 0; i < cube_count; i++) {
 			model = glm::mat4(1.0f);
@@ -446,8 +452,11 @@ int main() {
 
 		// Backpack
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+		model = glm::translate(model, backpackTrans.position);
+		model = glm::rotate(model, glm::radians(backpackTrans.rotation.x), glm::vec3(1.f, 0.f, 0.f));
+		model = glm::rotate(model, (backpackTrans.rotation.y), glm::vec3(0.f, 1.f, 0.f)); // slow with glm::radians
+		model = glm::rotate(model, glm::radians(backpackTrans.rotation.z), glm::vec3(0.f, 0.f, 1.f));
+		model = glm::scale(model, backpackTrans.scale);
 		backpack_shader->use();
 		backpack_shader->setMatrix4F("pv", pv);
 		backpack_shader->setMatrix4F("model", model);
