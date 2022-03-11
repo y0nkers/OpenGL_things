@@ -372,7 +372,7 @@ int main() {
 		oldTime = newTime;
 		inputHandle(window, deltaTime);
 
-		backpackTrans.rotation.y = (float)glfwGetTime();
+		backpackTrans.rotation.y = (float)glfwGetTime() / 2;
 
 		flashLight->position = camera.Position; // - camera.Up * 0.3f;
 		flashLight->direction = camera.Front;
